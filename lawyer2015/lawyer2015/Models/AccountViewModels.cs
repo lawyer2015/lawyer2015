@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using lawyer2015.Models.ViewModel;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace lawyer2015.Models
@@ -64,23 +66,22 @@ namespace lawyer2015.Models
 
     public class RegisterViewModel
     {
-        [Required]
-        [EmailAddress]
-        [Display(Name = "Email")]
+        public string FirstName { get; set; }
+        public string MiddleName { get; set; }
+        public string LastName { get; set; }
+        public DateTime DOB { get; set; }
+        public string UserName { get; set; }
         public string Email { get; set; }
-
-        [Required]
-        [StringLength(100, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 6)]
-        [DataType(DataType.Password)]
-        [Display(Name = "Password")]
         public string Password { get; set; }
-
-        [DataType(DataType.Password)]
-        [Display(Name = "Confirm password")]
-        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
+        public bool IsFreelance { get; set; }
+        public TypeViewModel ProviderTypeViewModel { get; set; } = new TypeViewModel();
+        public TypeViewModel ProviderDegreeViewModel { get; set; } = new TypeViewModel();
+        public List<AddressViewModel> Addresses { get; set; } = new List<AddressViewModel>();
+        public List<TelephoneViewModel> Telephones { get; set; } = new List<TelephoneViewModel>();
+        public List<EduQualViewModel> EduQuals { get; set; } = new List<EduQualViewModel>();
+        public List<CertificationViewModel> Certifications { get; set; } = new List<CertificationViewModel>();
     }
-
     public class ResetPasswordViewModel
     {
         [Required]

@@ -9,23 +9,34 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using lawyer2015.Models;
+using lawyer2015.Models.Database;
+using System.Collections.Generic;
+using System.Data.Entity;
+using lawyer2015;
+using lawyer2015.Models.ViewModel;
+using lawyer2015.Models.Scripts;
 
 namespace lawyer2015.Controllers
 {
-    [Authorize]
     public class AccountController : Controller
     {
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
-
-        public AccountController()
+        private ApplicationDbContext db = new ApplicationDbContext();
+        // LawyerVIP Get User
+        private string GetUserId
         {
+            get
+            {
+                return User.Identity.GetUserId();
+            }
         }
-
-        public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager )
+        private string GetUserName
         {
-            UserManager = userManager;
-            SignInManager = signInManager;
+            get
+            {
+                return User.Identity.GetUserName();
+            }
         }
 
         public ApplicationSignInManager SignInManager
@@ -34,9 +45,9 @@ namespace lawyer2015.Controllers
             {
                 return _signInManager ?? HttpContext.GetOwinContext().Get<ApplicationSignInManager>();
             }
-            private set 
-            { 
-                _signInManager = value; 
+            private set
+            {
+                _signInManager = value;
             }
         }
 
@@ -50,6 +61,17 @@ namespace lawyer2015.Controllers
             {
                 _userManager = value;
             }
+        }
+
+        public AccountController()
+        {
+        }
+
+        public AccountController(ApplicationUserManager userManager,
+            ApplicationSignInManager signInManager)
+        {
+            UserManager = userManager;
+            SignInManager = signInManager;
         }
 
         //
@@ -120,7 +142,7 @@ namespace lawyer2015.Controllers
             // If a user enters incorrect codes for a specified amount of time then the user account 
             // will be locked out for a specified amount of time. 
             // You can configure the account lockout settings in IdentityConfig
-            var result = await SignInManager.TwoFactorSignInAsync(model.Provider, model.Code, isPersistent:  model.RememberMe, rememberBrowser: model.RememberBrowser);
+            var result = await SignInManager.TwoFactorSignInAsync(model.Provider, model.Code, isPersistent: model.RememberMe, rememberBrowser: model.RememberBrowser);
             switch (result)
             {
                 case SignInStatus.Success:
@@ -139,29 +161,118 @@ namespace lawyer2015.Controllers
         [AllowAnonymous]
         public ActionResult Register()
         {
-            return View();
+            FirstRegisterViewModel first = new FirstRegisterViewModel()
+            {
+                ProviderDegrees = ApplicationManager.GetDropDown<ProviderDegree>(db.ProviderDegree),
+                UserTypes = ApplicationManager.GetDropDown<UserType>(db.UserType)
+            };
+            return View(first);
         }
 
         //
         // POST: /Account/Register
         [HttpPost]
         [AllowAnonymous]
-        [ValidateAntiForgeryToken]
         public async Task<ActionResult> Register(RegisterViewModel model)
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
-                var result = await UserManager.CreateAsync(user, model.Password);
+                var user = new ApplicationUser
+                {
+                    FirstName = model.FirstName,
+                    MidlleName = model.MiddleName,
+                    LastName = model.LastName,
+                    DOB = model.DOB,
+                    UserTypeId = model.ProviderTypeViewModel.Id,
+                    IsFreelance = model.IsFreelance,
+                    UserName = model.UserName,
+                    Email = model.Email
+                };
+
+                IdentityResult result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
-                    await SignInManager.SignInAsync(user, isPersistent:false, rememberBrowser:false);
-                    
-                    // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=320771
+                    UserProviderDegree userProviderDegree = new UserProviderDegree()
+                    {
+                        ProviderDegreeId = model.ProviderDegreeViewModel.Id,
+                        UserId = user.Id,
+                    };
+                    db.UserProviderDegree.Add(userProviderDegree);
+
+                    List<Address> addresses = new List<Address>();
+                    foreach (var item in model.Addresses)
+                    {
+                        Address a = new Address()
+                        {
+                            Country = item.Country,
+                            CityId = item.City,
+                            PostalCode = item.PostalCode,
+                            Region = item.Region,
+                            Street = item.Street,
+                            Street2 = item.Street2,
+                            UserId = user.Id
+                        };
+                        addresses.Add(a);
+                    }
+                    db.Address.AddRange(addresses);
+
+                    List<Telephone> telephones = new List<Telephone>();
+                    foreach (var item in model.Telephones)
+                    {
+                        Telephone t = new Telephone()
+                        {
+                            Phone = item.Phone,
+                            UserId = user.Id
+                        };
+                        telephones.Add(t);
+                    }
+                    db.Telephone.AddRange(telephones);
+
+                    List<EducationalQualification> educationalQualifications = new List<EducationalQualification>();
+                    foreach (var item in model.EduQuals)
+                    {
+                        EducationalQualification edu = new EducationalQualification()
+                        {
+                            CollegeId = item.College,
+                            DegreeId = item.Degree,
+                            UniversityId = item.University,
+                            QualificationType = item.QualType,
+                            GraduationYear = item.QualDate,
+                            QualDesc = item.QualDesc,
+                            UserId = user.Id
+                        };
+                        educationalQualifications.Add(edu);
+                    }
+                    db.EducationalQualification.AddRange(educationalQualifications);
+
+                    List<Certification> certifications = new List<Certification>();
+                    foreach (var item in model.Certifications)
+                    {
+                        Certification c = new Certification()
+                        {
+                            Descreption = item.Description,
+                            EndDate = item.EndDate,
+                            ExpDate = item.ExpDate,
+                            Location = item.Location,
+                            Name = item.Name,
+                            StartDate = item.StartDate,
+                            UserId = user.Id
+                        };
+                        certifications.Add(c);
+                    }
+                    db.Certification.AddRange(certifications);
+
+                    await db.SaveChangesAsync();
+                    await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
+
+                    // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=320771
                     // Send an email with this link
                     // string code = await UserManager.GenerateEmailConfirmationTokenAsync(user.Id);
                     // var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
                     // await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
+
+                    // LawyerVIP Add User To Role
+                    // UserManager.AddToRoleAsync
 
                     return RedirectToAction("Index", "Home");
                 }
@@ -209,7 +320,7 @@ namespace lawyer2015.Controllers
                     return View("ForgotPasswordConfirmation");
                 }
 
-                // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=320771
+                // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=320771
                 // Send an email with this link
                 // string code = await UserManager.GeneratePasswordResetTokenAsync(user.Id);
                 // var callbackUrl = Url.Action("ResetPassword", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);		
@@ -389,6 +500,7 @@ namespace lawyer2015.Controllers
         // POST: /Account/LogOff
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public ActionResult LogOff()
         {
             AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);

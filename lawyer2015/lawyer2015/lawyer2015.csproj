@@ -198,16 +198,39 @@
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
+    <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\AccountViewModels.cs" />
+    <Compile Include="Models\Database\Address.cs" />
+    <Compile Include="Models\Database\Certification.cs" />
+    <Compile Include="Models\Database\ChatManager.cs" />
+    <Compile Include="Models\Database\City.cs" />
+    <Compile Include="Models\Database\College.cs" />
+    <Compile Include="Models\Database\CoreTableID.cs" />
+    <Compile Include="Models\Database\CoreTableName.cs" />
+    <Compile Include="Models\Database\Degree.cs" />
+    <Compile Include="Models\Database\EducationalQualification.cs" />
+    <Compile Include="Models\Database\ProviderDegree.cs" />
+    <Compile Include="Models\Database\QualificationType.cs" />
+    <Compile Include="Models\Database\Rate.cs" />
+    <Compile Include="Models\Database\Request.cs" />
+    <Compile Include="Models\Database\RequestBid.cs" />
+    <Compile Include="Models\Database\RequestType.cs" />
+    <Compile Include="Models\Database\Telephone.cs" />
+    <Compile Include="Models\Database\University.cs" />
+    <Compile Include="Models\Database\UserProviderDegree.cs" />
+    <Compile Include="Models\Database\UserType.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
+    <Compile Include="Models\Scripts\ApplicationManager.cs" />
+    <Compile Include="Models\ViewModel\ViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\bootstrap-cosmo.css" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="favicon.ico" />
@@ -225,6 +248,7 @@
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
     <None Include="Scripts\jquery.validate-vsdoc.js" />
+    <Content Include="Scripts\jquery-3.3.1.js" />
     <Content Include="Scripts\jquery.validate.js" />
     <Content Include="Scripts\jquery.validate.min.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
@@ -267,6 +291,10 @@
     <Content Include="Views\Manage\VerifyPhoneNumber.cshtml" />
     <Content Include="Views\Shared\Lockout.cshtml" />
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
+    <Content Include="Views\User\AddAddress.cshtml" />
+    <Content Include="Views\User\AddCert.cshtml" />
+    <Content Include="Views\User\AddEduQual.cshtml" />
+    <Content Include="Views\User\AddTelephone.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
